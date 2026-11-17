@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <meta name="theme-color" content="#071424" />
+  <meta name="referrer" content="no-referrer" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' https://cdnjs.cloudflare.com; style-src 'self'; img-src 'self' data: blob:; media-src 'self' blob:; connect-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none';" />
+  <title>IM-INVENT · Live Scanner</title>
+  <link rel="stylesheet" href="scanner.css" />
+  <script defer src="https://cdnjs.cloudflare.com/ajax/libs/html5-qrcode/2.3.8/html5-qrcode.min.js"></script>
+  <script defer src="scanner.js"></script>
+</head>
+<body>
+  <main class="app">
+    <header class="hero">
+      <span class="eyebrow">IM INSPECTION · INVENTORY SYSTEM</span>
+      <h1>Live QR / Barcode Scanner</h1>
+      <p>Kamera belakang HP · Scanner terpisah dari iframe Google Apps Script</p>
+    </header>
+
+    <section class="card">
+      <div class="section-head"><h2>01 · Scan kode</h2><span id="bridge-state" class="pill">Menghubungkan...</span></div>
+      <div id="reader" aria-label="Tampilan kamera untuk memindai QR atau barcode"></div>
+      <p id="status" role="status" aria-live="polite">Tekan “Aktifkan kamera” untuk mulai.</p>
+      <div class="buttons">
+        <button id="start" class="primary" type="button">📷 Aktifkan kamera</button>
+        <button id="stop" type="button" disabled>Berhenti</button>
+        <button id="retry" type="button" disabled>Scan lagi</button>
+      </div>
+      <p class="hint">Saat muncul izin kamera, pilih <strong>Izinkan</strong>. Kode dikenali di perangkat, bukan dikirim ke server scanner.</p>
+    </section>
+
+    <section class="card">
+      <div class="section-head"><h2>02 · Hasil pemindaian</h2></div>
+      <label for="code">Kode yang terbaca</label>
+      <input id="code" type="text" maxlength="512" autocomplete="off" spellcheck="false" placeholder="Hasil scan akan muncul di sini" />
+      <div class="buttons">
+        <button id="send" class="primary" type="button">Kirim ke IM-INVENT</button>
+        <button id="copy" type="button">Salin kode</button>
+      </div>
+      <p id="return-status" class="hint" role="status" aria-live="polite">Tidak ada transaksi yang dijalankan otomatis.</p>
+      <div id="fallback" class="fallback" hidden>
+        <strong>Jika tab tidak terhubung otomatis:</strong>
+        <p>Tekan <b>Salin kode</b>, kembali ke tab IM-INVENT, lalu tempel di kolom “Ketik kode barang / Alat_ID”. Jangan tutup akun IM-INVENT ketika berpindah tab.</p>
+      </div>
+    </section>
+
+    <section class="card small">
+      <h2>Privasi & keamanan</h2>
+      <p>Halaman scanner ini hanya menerima gambar kamera untuk membaca kode. Tidak membutuhkan password, token login, atau akses langsung ke Google Sheets. Check-Out/Check-In tetap memerlukan persetujuan di IM-INVENT serta validasi pengguna pada backend.</p>
+    </section>
+    <footer>IM-INVENT · External HTTPS Scanner (RC6)</footer>
+  </main>
+</body>
+</html>
