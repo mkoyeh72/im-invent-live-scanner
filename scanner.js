@@ -1,4 +1,4 @@
-/* IM-INVENT External HTTPS Live Scanner (RC8)
+/* IM-INVENT External HTTPS Live Scanner (RC10 no-relogin fallback)
  * Scan runs client-side, no IM-INVENT token/user list is transferred here.
  * The only cross-origin message is the scanned string via validated opener handshake.
  * This page requires HTTPS and a modern browser with camera permission.
@@ -37,23 +37,44 @@
   function setStatus(msg){$('status').textContent=msg;}
   function setReturn(msg){$('return-status').textContent=msg;}
   function setBridge(ok){bridge.classList.toggle('ok',ok);bridge.textContent=ok?'IM-INVENT terhubung':'Mode manual tersedia';fallback.hidden=!!ok;}
+  // RC10: do NOT navigate to a fresh Apps Script /exec page: that creates a
+  // new tab/session and requires login again. Instead, copy the scanned value
+  // and return focus to the existing signed-in IM-INVENT tab when possible.
   function updateReturnButton(){
     const btn=$('return-app');
-    if(btn)btn.disabled=!(approvedReturnUrl && String($('code').value||'').trim());
+    if(btn)btn.disabled=!String($('code').value||'').trim();
     const hint=$('return-hint');
-    if(hint)hint.textContent=approvedReturnUrl?
-      'Tombol ini membuka kembali IM-INVENT melalui URL resminya. Login kembali jika diminta; detail akan muncul setelah data dimuat.':
-      'URL kembali belum diterima dari IM-INVENT. Buka scanner melalui tombol IM-INVENT yang sudah diupdate ke RC8, atau gunakan Salin kode.';
+    if(hint)hint.textContent='Salin kode, lalu kembali ke TAB IM-INVENT yang MASIH LOGIN. Jangan buka URL IM-INVENT baru. Di dialog scanner, ketuk “Ambil Kode dari Clipboard & Tampilkan Detail”.';
   }
-  function goBackToApp(){
+  async function copyAndReturnToExistingTab(){
     const code=String($('code').value||'').trim();
-    if(!approvedReturnUrl || !code || code.length>512){setReturn('URL IM-INVENT atau kode belum valid. Gunakan Salin kode.');return;}
-    const url=new URL(approvedReturnUrl);
-    url.searchParams.set('scan_code',code);
-    url.searchParams.set('scan_source','live_rc8');
-    // Never include password, session token, database contents, or other account information.
-    setReturn('Membuka IM-INVENT. Login jika diminta agar detail alat dapat dimuat.');
-    window.location.assign(url.href);
+    if(!code || code.length>512){setReturn('Kode belum valid (maksimal 512 karakter).');return;}
+    const button=$('return-app');
+    if(button)button.disabled=true;
+    let copied=false;
+    try{
+      if(navigator.clipboard && typeof navigator.clipboard.writeText==='function'){
+        await navigator.clipboard.writeText(code);
+        copied=true;
+      }else{
+        $('code').focus();$('code').select();
+        copied=!!(document.execCommand && document.execCommand('copy'));
+      }
+    }catch(err){copied=false;}
+    if(button)button.disabled=false;
+    if(!copied){
+      $('code').focus();$('code').select();
+      setReturn('Clipboard diblokir. Salin teks yang disorot secara manual, lalu BERPINDAH ke tab IM-INVENT yang sudah login.');
+      return;
+    }
+    setStatus('Kode tersalin. Tidak ada transaksi yang dilakukan.');
+    setReturn('Kode disalin. Beralih ke tab IM-INVENT yang SUDAH LOGIN, lalu pilih “Ambil Kode dari Clipboard & Tampilkan Detail”.');
+    // Best-effort focus/close of the scanner tab. Android browsers may refuse.
+    // Never force navigation to /exec and never send session tokens to GitHub.
+    if(opener){
+      try{if(!opener.closed)opener.focus();}catch(err){}
+      try{window.close();}catch(err){}
+    }
   }
   function hello(){
     if(openerOrigin || !opener || !validChannel)return;
@@ -153,7 +174,7 @@
     }catch(_){$('code').focus();$('code').select();setReturn('Tidak bisa salin otomatis. Salin teks yang terseleksi secara manual.');}
   }
   updateReturnButton();
-  $('return-app').addEventListener('click',()=>goBackToApp());
+  $('return-app').addEventListener('click',()=>copyAndReturnToExistingTab());
   $('code').addEventListener('input',()=>updateReturnButton());
   $('start').addEventListener('click',()=>start());
   $('stop').addEventListener('click',()=>stop());
