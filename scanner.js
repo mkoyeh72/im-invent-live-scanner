@@ -1,4 +1,4 @@
-/* IM-INVENT External HTTPS Live Scanner (RC6)
+/* IM-INVENT External HTTPS Live Scanner (RC8)
  * Scan runs client-side, no IM-INVENT token/user list is transferred here.
  * The only cross-origin message is the scanned string via validated opener handshake.
  * This page requires HTTPS and a modern browser with camera permission.
@@ -10,6 +10,18 @@
   const channel=String(query.get('channel')||'');
   const validChannel=/^[a-f0-9]{32}$/i.test(channel);
   const opener=window.opener || null;
+  const returnTo=String(query.get('return_to')||'');
+  function validatedReturnUrl(value){
+    try {
+      const url=new URL(value);
+      // Only Google Apps Script web-app URLs. Never navigate to arbitrary websites.
+      if(url.protocol!=='https:' || url.hostname!=='script.google.com' ||
+        !/^\/macros\/s\/[A-Za-z0-9_-]+\/(?:exec|dev)\/?$/.test(url.pathname) ||
+        url.search || url.hash || url.username || url.password) return '';
+      return url.href;
+    }catch(_){return '';}
+  }
+  const approvedReturnUrl=validatedReturnUrl(returnTo);
   let openerOrigin='';
   let qr=null, active=false, result='', confirmed=false, lastValue='', lastAt=0;
   let handshakeAttempts=0;
@@ -25,6 +37,24 @@
   function setStatus(msg){$('status').textContent=msg;}
   function setReturn(msg){$('return-status').textContent=msg;}
   function setBridge(ok){bridge.classList.toggle('ok',ok);bridge.textContent=ok?'IM-INVENT terhubung':'Mode manual tersedia';fallback.hidden=!!ok;}
+  function updateReturnButton(){
+    const btn=$('return-app');
+    if(btn)btn.disabled=!(approvedReturnUrl && String($('code').value||'').trim());
+    const hint=$('return-hint');
+    if(hint)hint.textContent=approvedReturnUrl?
+      'Tombol ini membuka kembali IM-INVENT melalui URL resminya. Login kembali jika diminta; detail akan muncul setelah data dimuat.':
+      'URL kembali belum diterima dari IM-INVENT. Buka scanner melalui tombol IM-INVENT yang sudah diupdate ke RC8, atau gunakan Salin kode.';
+  }
+  function goBackToApp(){
+    const code=String($('code').value||'').trim();
+    if(!approvedReturnUrl || !code || code.length>512){setReturn('URL IM-INVENT atau kode belum valid. Gunakan Salin kode.');return;}
+    const url=new URL(approvedReturnUrl);
+    url.searchParams.set('scan_code',code);
+    url.searchParams.set('scan_source','live_rc8');
+    // Never include password, session token, database contents, or other account information.
+    setReturn('Membuka IM-INVENT. Login jika diminta agar detail alat dapat dimuat.');
+    window.location.assign(url.href);
+  }
   function hello(){
     if(openerOrigin || !opener || !validChannel)return;
     try{opener.postMessage({source:'IM-INVENT-LIVE-SCANNER',type:'HELLO',channel:channel},'*');}catch(_){}
@@ -70,6 +100,7 @@
     lastValue=clean;lastAt=now;
     result=clean;confirmed=false;
     $('code').value=clean;
+    updateReturnButton();
     setStatus('Kode terbaca. Kamera dihentikan untuk verifikasi.');
     $('retry').disabled=false;
     stop().catch(()=>{});
@@ -121,9 +152,12 @@
       setBridge(false);
     }catch(_){$('code').focus();$('code').select();setReturn('Tidak bisa salin otomatis. Salin teks yang terseleksi secara manual.');}
   }
+  updateReturnButton();
+  $('return-app').addEventListener('click',()=>goBackToApp());
+  $('code').addEventListener('input',()=>updateReturnButton());
   $('start').addEventListener('click',()=>start());
   $('stop').addEventListener('click',()=>stop());
-  $('retry').addEventListener('click',()=>{result='';confirmed=false;$('code').value='';start();});
+  $('retry').addEventListener('click',()=>{result='';confirmed=false;$('code').value='';updateReturnButton();start();});
   $('send').addEventListener('click',()=>send());
   $('copy').addEventListener('click',()=>copy());
   window.addEventListener('pagehide',()=>{stop().catch(()=>{});});

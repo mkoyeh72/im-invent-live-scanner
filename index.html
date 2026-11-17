@@ -36,9 +36,11 @@
       <label for="code">Kode yang terbaca</label>
       <input id="code" type="text" maxlength="512" autocomplete="off" spellcheck="false" placeholder="Hasil scan akan muncul di sini" />
       <div class="buttons">
-        <button id="send" class="primary" type="button">Kirim ke IM-INVENT</button>
+        <button id="send" class="primary" type="button">Kirim otomatis (jika terhubung)</button>
         <button id="copy" type="button">Salin kode</button>
       </div>
+      <button id="return-app" type="button" class="primary return-app" disabled>✅ Buka Detail di IM-INVENT</button>
+      <p class="hint" id="return-hint">Jika tautan pengembalian tersedia, tombol ini tidak bergantung pada koneksi antartab. Kamu mungkin perlu login kembali di IM-INVENT.</p>
       <p id="return-status" class="hint" role="status" aria-live="polite">Tidak ada transaksi yang dijalankan otomatis.</p>
       <div id="fallback" class="fallback" hidden>
         <strong>Jika tab tidak terhubung otomatis:</strong>
@@ -50,7 +52,7 @@
       <h2>Privasi & keamanan</h2>
       <p>Halaman scanner ini hanya menerima gambar kamera untuk membaca kode. Tidak membutuhkan password, token login, atau akses langsung ke Google Sheets. Check-Out/Check-In tetap memerlukan persetujuan di IM-INVENT serta validasi pengguna pada backend.</p>
     </section>
-    <footer>IM-INVENT · External HTTPS Scanner (RC6)</footer>
+    <footer>IM-INVENT · External HTTPS Scanner (RC8)</footer>
   </main>
 </body>
 </html>

@@ -6,3 +6,6 @@
 #status{font-size:13px;color:#c5d4e3;min-height:18px;margin:14px 0 10px}.hint{font-size:12px;line-height:1.5;color:#a4b5c7;margin:12px 0 0}.buttons{display:flex;flex-wrap:wrap;gap:9px}.buttons button{flex:1;min-width:106px}.buttons button,button{padding:12px 15px;background:#21364b;border:1px solid #446077;color:#ecf8fe;font-weight:700;border-radius:11px;font-size:13px;cursor:pointer}.buttons .primary{background:#10b981;border-color:#10b981;color:#04201c}.buttons button:disabled{opacity:.4;cursor:not-allowed}
 label{display:block;font-size:12px;font-weight:700;color:#b9cbde;margin-bottom:9px}input{display:block;width:100%;background:#06101e;color:#e8f8fd;border:1px solid #49687e;padding:13px 12px;border-radius:11px;font:500 15px ui-monospace,monospace;margin-bottom:12px}
 .fallback{padding:13px;border-radius:12px;background:#57390a;border:1px solid #946919;color:#ffe4a2;font-size:12px;line-height:1.55;margin-top:11px}.fallback p{margin:6px 0 0}.small p{font-size:12px;line-height:1.65;color:#aebfce;margin:12px 0 0}footer{text-align:center;color:#658093;font-size:10px;padding:12px 0}
+
+.return-app { width:100%; margin-top:12px; font-size:1rem; padding:14px 16px; }
+.return-app:disabled { opacity:.5; cursor:not-allowed; }
